@@ -12,9 +12,106 @@
 html, body {
     width: 100%;
     height: 100%;
+    font-family: font;
 }
 
 main {
     width: 100%;
-    height: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #ffffff;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    nav{
+        width: 100%;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+
+        .buttons-left{
+            display: flex;      
+            gap: 7px;
+            background-color: #ffffff;
+            padding: 10px 30px;
+            border-radius: 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+            button{
+                font-size: 18px;
+                cursor: pointer;
+                padding: 5px 10px;
+                border-radius: 5px;
+                color: #1f1f1f;
+                background-color: #f7f7f7;
+                border: 1px solid #cfcfcf;
+                transition: all ease-in-out 0.2s;
+
+                &:hover{
+                    background-color: #ececec;
+                }
+
+                &:active{
+                    scale: 0.92;
+                }
+            }
+        }
+
+        .buttons-right{
+            display: flex;
+            gap: 7px;
+            background-color: #ffffff;
+            padding: 10px 30px;
+            border-radius: 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+            button{
+                padding: 10px;
+                border-radius: 7px;
+                color: #ffffff;
+                cursor: pointer;
+                border: none;
+                transition: all ease-in-out 0.2s;
+
+                &:hover{
+                    background-color: #eeecec;
+                    color: #1f1f1f;
+                 }
+                 
+                &:active{
+                    scale: 0.9;
+                }
+            }
+
+            .share{
+                background-color: #954eec;
+            }
+
+            .save{
+                background-color: rgb(82, 132, 226);
+
+            }
+        }
+    }
+
+    .screen{
+        width: 4000px;
+        height: 4000px;
+        position: relative;
+        background-color: azure;
+        padding: 10px;
+
+        .h{
+            position: absolute;
+            width: 500px;
+            height: 300px;
+            background-color: aquamarine;
+        }
+    }
 }
