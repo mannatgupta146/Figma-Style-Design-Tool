@@ -13,6 +13,7 @@ html, body {
     width: 100%;
     height: 100%;
     font-family: font;
+    overflow: hidden; //show
 }
 
 main {
@@ -23,6 +24,11 @@ main {
 
     &::-webkit-scrollbar {
         display: none;
+    }
+
+    .selected{
+        outline: 2px solid #1ae8f7;
+        outline-offset: 2px;
     }
 
     nav{
@@ -100,14 +106,74 @@ main {
         }
     }
 
+    footer{
+        padding: 10px;
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+
+        .footer-container{
+            display: flex;      
+            gap: 12px;
+            background-color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.362);
+
+            i{
+                font-size: 20px;
+                color: #555;
+                cursor: pointer;
+                padding: 8px;
+                border-radius: 8px;
+                transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+
+                &:hover{
+                    background-color: #f2f2f2;
+                    color: #6311f2;
+                }
+
+                &:active{
+                    transform: scale(0.9);
+                }
+            }
+
+            .tool.active,.tool.dragging{
+                background-color: #e9e2fb;
+                color: #6b2fd6;
+            }
+  
+        }
+    }
+
     .screen{
         width: 4000px;
         height: 4000px;
-        position: relative;
-        background-color: azure;
-        padding: 10px;
+        position: absolute;
+        background-color: azure;        
+        flex-grow: 1;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+        grid-template-rows: repeat(auto-fill, minmax(30px, 1fr));
 
-        .h{
+        .block {
+            width: 30px;
+            height: 30px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+
+        &::-webkit-scrollbar{
+            display: none;
+        }
+
+        .rectangle{
             position: absolute;
             width: 500px;
             height: 300px;
