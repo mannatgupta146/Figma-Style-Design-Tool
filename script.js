@@ -11,6 +11,8 @@ const toolRectangleIcon = document.querySelector(".tool-rectangle")
 const toolResizeIcon = document.querySelector(".tool-resize")
 const toolTextIcon = document.querySelector(".tool-text")
 const tools = document.querySelectorAll(".tool")
+const toolDeleteIcon = document.querySelector(".tool-delete")
+
 
 /* =====================================================
    GLOBAL STATE
@@ -186,6 +188,8 @@ function handleDragMove(e) {
 
   startX = e.clientX
   startY = e.clientY
+  syncElementToStore(selectedElement)
+
 }
 
 /* =====================================================
@@ -214,6 +218,8 @@ function handleRotateMove(e) {
 
   selectedElement.style.transform = `rotate(${deg}deg)`
   selectedElement.dataset.rotation = deg
+  syncElementToStore(selectedElement)
+
 }
 
 /* =====================================================
@@ -254,6 +260,8 @@ function handleResizeMove(e) {
   selectedElement.style.height = h + "px"
   selectedElement.style.left = l + "px"
   selectedElement.style.top = t + "px"
+  syncElementToStore(selectedElement)
+
 }
 
 /* =====================================================
@@ -286,6 +294,7 @@ screen.addEventListener("mousedown", (e) => {
 
     screen.appendChild(text)
     selectElement(text)
+    elements.push(createElementObject(text))
 
     setTimeout(() => text.focus(), 0)
     setActiveTool("select", toolSelectIcon)
@@ -308,6 +317,7 @@ screen.addEventListener("mousedown", (e) => {
 
     screen.appendChild(r)
     selectElement(r)
+    elements.push(createElementObject(r))
     setActiveTool("select", toolSelectIcon)
     return
   }
@@ -357,4 +367,99 @@ for (let r = 0; r < rows; r++) {
     block.classList.add("block")
     screen.appendChild(block)
   }
+}
+
+/* =====================================================
+   ELEMENT STORE
+===================================================== */
+
+let elements = []   // 👈 SINGLE SOURCE OF TRUTH
+
+function createElementObject(el) {
+  return {
+    id: el.dataset.id,
+    type: el.dataset.type,
+    x: el.offsetLeft,
+    y: el.offsetTop,
+    width: el.offsetWidth || null,
+    height: el.offsetHeight || null,
+    rotation: parseFloat(el.dataset.rotation || 0),
+    text: el.dataset.type === "text" ? el.textContent : null
+  }
+}
+
+function syncElementToStore(el) {
+  const idx = elements.findIndex(e => e.id === el.dataset.id)
+  if (idx === -1) return
+
+  elements[idx].x = el.offsetLeft
+  elements[idx].y = el.offsetTop
+  elements[idx].width = el.offsetWidth || null
+  elements[idx].height = el.offsetHeight || null
+  elements[idx].rotation = parseFloat(el.dataset.rotation || 0)
+
+  if (el.dataset.type === "text") {
+    elements[idx].text = el.textContent
+  }
+}
+
+function deleteSelectedElement() {
+  if (!selectedElement) return
+
+  const ok = confirm("Delete selected element?")
+  if (!ok) return
+
+  const idx = elements.findIndex(e => e.id === selectedElement.dataset.id)
+  if (idx !== -1) {
+    elements.splice(idx, 1)
+  }
+
+  selectedElement.remove()
+  selectedElement = null
+
+  localStorage.setItem("canvasElements", JSON.stringify(elements))
+
+  stopAllActions()
+  setActiveTool("select", toolSelectIcon)
+}
+
+document.addEventListener("keydown", (e) => {
+  if (!selectedElement) return
+
+  if (
+    document.activeElement &&
+    document.activeElement.classList.contains("text-box")
+  ) return
+
+  if (e.key === "Delete" || e.key === "Backspace") {
+    deleteSelectedElement()
+  }
+})
+
+document.addEventListener("keydown", (e) => {
+  if (!selectedElement) return
+
+  const step = 5
+  let left = selectedElement.offsetLeft
+  let top = selectedElement.offsetTop
+
+  if (e.key === "ArrowUp") top -= step
+  if (e.key === "ArrowDown") top += step
+  if (e.key === "ArrowLeft") left -= step
+  if (e.key === "ArrowRight") left += step
+
+  left = Math.max(0, Math.min(left, screen.clientWidth - selectedElement.offsetWidth))
+  top = Math.max(0, Math.min(top, screen.clientHeight - selectedElement.offsetHeight))
+
+  selectedElement.style.left = left + "px"
+  selectedElement.style.top = top + "px"
+
+  syncElementToStore(selectedElement)
+})
+
+const saveBtn = document.querySelector(".buttons-right .save")
+
+saveBtn.onclick = () => {
+  localStorage.setItem("canvasElements", JSON.stringify(elements))
+  alert("Canvas saved successfully ✅")
 }
