@@ -44,7 +44,7 @@ main nav .buttons-left {
   background-color: #ffffff;
   padding: 10px 30px;
   border-radius: 40px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 main nav .buttons-left button {
   font-size: 18px;
@@ -57,7 +57,8 @@ main nav .buttons-left button {
   transition: all ease-in-out 0.2s;
 }
 main nav .buttons-left button:hover {
-  background-color: #ececec;
+  background-color: #010101;
+  color: #cfcfcf;
 }
 main nav .buttons-left button:active {
   scale: 0.92;
@@ -68,7 +69,7 @@ main nav .buttons-right {
   background-color: #ffffff;
   padding: 10px 30px;
   border-radius: 40px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 main nav .buttons-right button {
   padding: 10px;
@@ -81,6 +82,7 @@ main nav .buttons-right button {
 main nav .buttons-right button:hover {
   background-color: #eeecec;
   color: #1f1f1f;
+  border: 1px solid #1f1f1f;
 }
 main nav .buttons-right button:active {
   scale: 0.9;
@@ -119,7 +121,7 @@ main footer .footer-container i {
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
 }
 main footer .footer-container i:hover {
-  background-color: #f2f2f2;
+  background-color: #d2d0d0;
   color: #6311f2;
 }
 main footer .footer-container i:active {
@@ -150,7 +152,42 @@ main .screen::-webkit-scrollbar {
 }
 main .screen .rectangle {
   position: absolute;
-  width: 500px;
-  height: 300px;
+  width: 400px;
+  height: 250px;
   background-color: aquamarine;
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+main .screen .rectangle .resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #ffffff;
+  border: 2px solid #6b2fd6;
+  border-radius: 50%;
+  display: none;
+  z-index: 10;
+}
+main .screen .rectangle .resize-handle.tl {
+  top: -6px;
+  left: -6px;
+  cursor: nwse-resize;
+}
+main .screen .rectangle .resize-handle.tr {
+  top: -6px;
+  right: -6px;
+  cursor: nesw-resize;
+}
+main .screen .rectangle .resize-handle.bl {
+  bottom: -6px;
+  left: -6px;
+  cursor: nesw-resize;
+}
+main .screen .rectangle .resize-handle.br {
+  bottom: -6px;
+  right: -6px;
+  cursor: nwse-resize;
+}
+main .screen .rectangle.selected.resize-mode .resize-handle {
+  display: block;
 }/*# sourceMappingURL=style.css.map */
