@@ -9,6 +9,7 @@ const toolPanIcon = document.querySelector(".tool-pan")
 const toolSelectIcon = document.querySelector(".tool-select")
 const toolRectangleIcon = document.querySelector(".tool-rectangle")
 const toolResizeIcon = document.querySelector(".tool-resize")
+const toolTextIcon = document.querySelector(".tool-text")
 const tools = document.querySelectorAll(".tool")
 
 /* =====================================================
@@ -26,6 +27,11 @@ let isDragDisabled = false
 let isResizing = false
 let resizeHandle = null
 
+// 🔄 ROTATION STATE
+let isRotating = false
+let startAngle = 0
+let startRotation = 0
+
 let startX = 0
 let startY = 0
 let startWidth = 0
@@ -39,8 +45,10 @@ let startScrollTop = 0
 const MIN_WIDTH = 100
 const MIN_HEIGHT = 80
 
+let elementCounter = 0
+
 /* =====================================================
-   ZOOM LOGIC
+   ZOOM
 ===================================================== */
 
 function updateTransform() {
@@ -66,6 +74,7 @@ function stopAllActions() {
   isDragging = false
   isPanning = false
   isResizing = false
+  isRotating = false
   resizeHandle = null
   toolPanIcon.classList.remove("dragging")
   screen.style.cursor = "default"
@@ -76,9 +85,13 @@ function setActiveTool(name, icon) {
   if (icon) icon.classList.add("active")
   activeTool = name
   stopAllActions()
+
+  if (selectedElement) {
+    selectedElement.classList.toggle("resize-mode", name === "resize")
+  }
 }
 
-/* ---- Toolbar Buttons ---- */
+/* ---- Toolbar ---- */
 
 toolSelectIcon.onclick = () => setActiveTool("select", toolSelectIcon)
 
@@ -94,18 +107,14 @@ toolRectangleIcon.onclick = () => {
 
 toolResizeIcon.onclick = () => {
   if (!selectedElement) return
-
-  if (activeTool === "resize") {
-    // turn resize OFF
-    selectedElement.classList.remove("resize-mode")
-    setActiveTool("select", toolSelectIcon)
-  } else {
-    // turn resize ON
-    setActiveTool("resize", toolResizeIcon)
-    selectedElement.classList.add("resize-mode")
-  }
+  activeTool === "resize"
+    ? setActiveTool("select", toolSelectIcon)
+    : setActiveTool("resize", toolResizeIcon)
 }
 
+toolTextIcon.onclick = () => {
+  setActiveTool("text", toolTextIcon)
+}
 
 /* =====================================================
    SELECTION
@@ -113,9 +122,9 @@ toolResizeIcon.onclick = () => {
 
 function addResizeHandles(el) {
   ["tl", "tr", "bl", "br"].forEach(pos => {
-    const handle = document.createElement("div")
-    handle.className = `resize-handle ${pos}`
-    el.appendChild(handle)
+    const h = document.createElement("div")
+    h.className = `resize-handle ${pos}`
+    el.appendChild(h)
   })
 }
 
@@ -124,19 +133,16 @@ function selectElement(el) {
   selectedElement = el
   el.classList.add("selected")
 
-  if (!el.querySelector(".resize-handle")) {
+  if (el.dataset.type === "rectangle" && !el.querySelector(".resize-handle")) {
     addResizeHandles(el)
   }
 
-  // show handles ONLY if resize tool is active
-  if (activeTool === "resize") {
-    el.classList.add("resize-mode")
-  }
+  el.classList.toggle("resize-mode", activeTool === "resize")
 }
 
 function clearSelection() {
   if (!selectedElement) return
-  selectedElement.classList.remove("selected")
+  selectedElement.classList.remove("selected", "resize-mode")
   selectedElement = null
 }
 
@@ -169,18 +175,45 @@ function handleDragMove(e) {
   const dx = (e.clientX - startX) / scale
   const dy = (e.clientY - startY) / scale
 
-  let newLeft = selectedElement.offsetLeft + dx
-  let newTop = selectedElement.offsetTop + dy
+  let left = selectedElement.offsetLeft + dx
+  let top = selectedElement.offsetTop + dy
 
-  /* Boundary restriction */
-  newLeft = Math.max(0, Math.min(newLeft, screen.clientWidth - selectedElement.offsetWidth))
-  newTop = Math.max(0, Math.min(newTop, screen.clientHeight - selectedElement.offsetHeight))
+  left = Math.max(0, Math.min(left, screen.clientWidth - selectedElement.offsetWidth))
+  top = Math.max(0, Math.min(top, screen.clientHeight - selectedElement.offsetHeight))
 
-  selectedElement.style.left = newLeft + "px"
-  selectedElement.style.top = newTop + "px"
+  selectedElement.style.left = left + "px"
+  selectedElement.style.top = top + "px"
 
   startX = e.clientX
   startY = e.clientY
+}
+
+/* =====================================================
+   🔄 ROTATION (ALT + DRAG)
+===================================================== */
+
+function startRotate(e) {
+  isRotating = true
+
+  const rect = selectedElement.getBoundingClientRect()
+  const cx = rect.left + rect.width / 2
+  const cy = rect.top + rect.height / 2
+
+  startAngle = Math.atan2(e.clientY - cy, e.clientX - cx)
+  startRotation = parseFloat(selectedElement.dataset.rotation || 0)
+}
+
+function handleRotateMove(e) {
+  const rect = selectedElement.getBoundingClientRect()
+  const cx = rect.left + rect.width / 2
+  const cy = rect.top + rect.height / 2
+
+  const currentAngle = Math.atan2(e.clientY - cy, e.clientX - cx)
+  const delta = currentAngle - startAngle
+  const deg = startRotation + delta * (180 / Math.PI)
+
+  selectedElement.style.transform = `rotate(${deg}deg)`
+  selectedElement.dataset.rotation = deg
 }
 
 /* =====================================================
@@ -209,19 +242,13 @@ function handleResizeMove(e) {
   let l = startLeft
   let t = startTop
 
-  if (resizeHandle.includes("r")) w = startWidth + dx
-  if (resizeHandle.includes("l")) { w = startWidth - dx; l = startLeft + dx }
-  if (resizeHandle.includes("b")) h = startHeight + dy
-  if (resizeHandle.includes("t")) { h = startHeight - dy; t = startTop + dy }
+  if (resizeHandle.includes("r")) w += dx
+  if (resizeHandle.includes("l")) { w -= dx; l += dx }
+  if (resizeHandle.includes("b")) h += dy
+  if (resizeHandle.includes("t")) { h -= dy; t += dy }
 
   w = Math.max(MIN_WIDTH, w)
   h = Math.max(MIN_HEIGHT, h)
-
-  l = Math.max(0, l)
-  t = Math.max(0, t)
-
-  if (l + w > screen.clientWidth) w = screen.clientWidth - l
-  if (t + h > screen.clientHeight) h = screen.clientHeight - t
 
   selectedElement.style.width = w + "px"
   selectedElement.style.height = h + "px"
@@ -230,64 +257,69 @@ function handleResizeMove(e) {
 }
 
 /* =====================================================
-   CURSOR UPDATE (Resize Tool Only)
-===================================================== */
-
-function updateResizeCursor(e) {
-  if (activeTool !== "resize" || !selectedElement) {
-    screen.style.cursor = "default"
-    return
-  }
-
-  const rect = selectedElement.getBoundingClientRect()
-  const gap = 10
-
-  const nearL = Math.abs(e.clientX - rect.left) <= gap
-  const nearR = Math.abs(e.clientX - rect.right) <= gap
-  const nearT = Math.abs(e.clientY - rect.top) <= gap
-  const nearB = Math.abs(e.clientY - rect.bottom) <= gap
-
-  if ((nearL && nearT) || (nearR && nearB)) {
-    screen.style.cursor = "nwse-resize"
-  } else if ((nearR && nearT) || (nearL && nearB)) {
-    screen.style.cursor = "nesw-resize"
-  } else {
-    screen.style.cursor = "default"
-  }
-}
-
-/* =====================================================
    MOUSE EVENTS
 ===================================================== */
 
 screen.addEventListener("mousedown", (e) => {
 
-  /* CREATE RECTANGLE */
-  if (activeTool === "rectangle") {
-    const rect = document.createElement("div")
-    rect.className = "rectangle"
+  /* 🔄 ROTATE (ALT) */
+  if (selectedElement && e.altKey) {
+    startRotate(e)
+    return
+  }
 
-    const canvas = screen.getBoundingClientRect()
-    const x = (e.clientX - canvas.left + main.scrollLeft) / scale
-    const y = (e.clientY - canvas.top + main.scrollTop) / scale
+  /* TEXT */
+  if (activeTool === "text") {
+    const text = document.createElement("div")
+    text.className = "text-box"
+    text.contentEditable = "true"
+    text.dataset.type = "text"
+    text.dataset.id = `el-${++elementCounter}`
 
-    rect.style.left = x - 200 + "px"
-    rect.style.top = y - 125 + "px"
+    const rect = screen.getBoundingClientRect()
+    const x = (e.clientX - rect.left + main.scrollLeft) / scale
+    const y = (e.clientY - rect.top + main.scrollTop) / scale
 
-    screen.appendChild(rect)
-    selectElement(rect)
+    text.style.left = x + "px"
+    text.style.top = y + "px"
+    text.textContent = "Type here"
+
+    screen.appendChild(text)
+    selectElement(text)
+
+    setTimeout(() => text.focus(), 0)
     setActiveTool("select", toolSelectIcon)
     return
   }
 
-  /* RESIZE HANDLE */
+  /* RECTANGLE */
+  if (activeTool === "rectangle") {
+    const r = document.createElement("div")
+    r.className = "rectangle"
+    r.dataset.type = "rectangle"
+    r.dataset.id = `el-${++elementCounter}`
+
+    const rect = screen.getBoundingClientRect()
+    const x = (e.clientX - rect.left + main.scrollLeft) / scale
+    const y = (e.clientY - rect.top + main.scrollTop) / scale
+
+    r.style.left = x - 200 + "px"
+    r.style.top = y - 125 + "px"
+
+    screen.appendChild(r)
+    selectElement(r)
+    setActiveTool("select", toolSelectIcon)
+    return
+  }
+
+  /* RESIZE */
   if (activeTool === "resize" && e.target.classList.contains("resize-handle")) {
     startResize(e, e.target.classList[1])
     return
   }
 
-  /* SELECT RECTANGLE */
-  if (e.target.classList.contains("rectangle")) {
+  /* SELECT */
+  if (e.target.classList.contains("rectangle") || e.target.classList.contains("text-box")) {
     selectElement(e.target)
     if (activeTool === "pan" && !isDragDisabled) startDrag(e)
     return
@@ -302,9 +334,8 @@ screen.addEventListener("mousedown", (e) => {
   clearSelection()
 })
 
-window.addEventListener("mousemove", (e) => {
-  updateResizeCursor(e)
-
+screen.addEventListener("mousemove", (e) => {
+  if (isRotating) return handleRotateMove(e)
   if (isResizing) return handleResizeMove(e)
   if (isPanning) return handlePanMove(e)
   if (isDragging && selectedElement) handleDragMove(e)
@@ -313,22 +344,12 @@ window.addEventListener("mousemove", (e) => {
 window.addEventListener("mouseup", stopAllActions)
 
 /* =====================================================
-   DOUBLE CLICK → LOCK DRAG
-===================================================== */
-
-screen.addEventListener("dblclick", (e) => {
-  if (!e.target.classList.contains("rectangle")) return
-  isDragDisabled = !isDragDisabled
-})
-
-/* =====================================================
    GRID (UNCHANGED)
 ===================================================== */
 
-const blockWidth = 30
-const blockHeight = 30
-const cols = Math.floor(screen.clientWidth / blockWidth)
-const rows = Math.floor(screen.clientHeight / blockHeight)
+const blockSize = 30
+const cols = Math.floor(screen.clientWidth / blockSize)
+const rows = Math.floor(screen.clientHeight / blockSize)
 
 for (let r = 0; r < rows; r++) {
   for (let c = 0; c < cols; c++) {

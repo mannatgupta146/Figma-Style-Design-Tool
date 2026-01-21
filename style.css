@@ -190,4 +190,17 @@ main .screen .rectangle .resize-handle.br {
 }
 main .screen .rectangle.selected.resize-mode .resize-handle {
   display: block;
+}
+main .screen .text-box {
+  position: absolute;
+  min-width: 120px;
+  min-height: 24px;
+  padding: 4px 6px;
+  font-size: 16px;
+  background: transparent;
+  outline: none;
+  cursor: text;
+}
+main .screen .text-box.selected {
+  outline: 1px dashed #6b2fd6;
 }/*# sourceMappingURL=style.css.map */

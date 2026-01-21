@@ -222,5 +222,20 @@ main {
         .rectangle.selected.resize-mode .resize-handle {
             display: block;
         }
+
+        .text-box{
+            position: absolute;
+            min-width: 120px;
+            min-height: 24px;
+            padding: 4px 6px;
+            font-size: 16px;
+            background: transparent;
+            outline: none;
+            cursor: text;
+        }
+
+        .text-box.selected {
+            outline: 1px dashed #6b2fd6;
+        }
     }
 }
