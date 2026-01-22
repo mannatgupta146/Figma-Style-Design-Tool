@@ -93,6 +93,43 @@ main nav .buttons-right .share {
 main nav .buttons-right .save {
   background-color: rgb(82, 132, 226);
 }
+main nav .layers-panel {
+  position: fixed;
+  right: 20px;
+  top: 80px;
+  width: 200px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+}
+main nav .layers-panel h4 {
+  margin-bottom: 18px;
+  font-size: 18px;
+}
+main nav .layers-panel .layers-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+main nav .layers-panel .layers-list li {
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 14px;
+}
+main nav .layers-panel .layers-list li.active {
+  background-color: #e9ef2b;
+  color: #6b2fd6;
+}
+main nav .layers-panel .layers-controls button {
+  width: 100%;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
 main footer {
   padding: 10px;
   display: flex;

@@ -12,7 +12,9 @@ const toolResizeIcon = document.querySelector(".tool-resize")
 const toolTextIcon = document.querySelector(".tool-text")
 const tools = document.querySelectorAll(".tool")
 const toolDeleteIcon = document.querySelector(".tool-delete")
-
+const layersList = document.querySelector(".layers-list")
+const layerUpBtn = document.querySelector(".layer-up")
+const layerDownBtn = document.querySelector(".layer-down")
 
 /* =====================================================
    GLOBAL STATE
@@ -111,10 +113,72 @@ function loadFromLocalStorage() {
   return Math.max(max, isNaN(n) ? 0 : n)
 }, 0)
 
+applyZIndex()
+renderLayers()
+
   } catch (err) {
     console.error("Failed to load canvas:", err)
   }
 }
+
+function applyZIndex() {
+  elements.forEach((elData, index) => {
+    const el = screen.querySelector(`[data-id="${elData.id}"]`)
+    if (el) el.style.zIndex = index + 1
+  })
+}
+
+
+function renderLayers() {
+  layersList.innerHTML = ""
+
+  // show top-most at top of list
+  elements.slice().reverse().forEach(el => {
+    const li = document.createElement("li")
+    li.textContent = `${el.type} (${el.id})`
+    li.dataset.id = el.id
+
+    if (selectedElement?.dataset.id === el.id) {
+      li.classList.add("active")
+    }
+
+    li.onclick = () => {
+      const target = screen.querySelector(`[data-id="${el.id}"]`)
+      if (target) selectElement(target)
+      renderLayers()
+    }
+
+    layersList.appendChild(li)
+  })
+}
+
+layerUpBtn.onclick = () => {
+  if (!selectedElement) return
+
+  const idx = elements.findIndex(e => e.id === selectedElement.dataset.id)
+  if (idx === elements.length - 1) return
+
+  ;[elements[idx], elements[idx + 1]] = [elements[idx + 1], elements[idx]]
+
+  applyZIndex()
+  renderLayers()
+  localStorage.setItem("canvasElements", JSON.stringify(elements))
+}
+
+layerDownBtn.onclick = () => {
+  if (!selectedElement) return
+
+  const idx = elements.findIndex(e => e.id === selectedElement.dataset.id)
+  if (idx === 0) return
+
+  ;[elements[idx], elements[idx - 1]] = [elements[idx - 1], elements[idx]]
+
+  applyZIndex()
+  renderLayers()
+  localStorage.setItem("canvasElements", JSON.stringify(elements))
+}
+
+
 
 
 /* =====================================================
@@ -363,9 +427,12 @@ screen.addEventListener("mousedown", (e) => {
     screen.appendChild(text)
     selectElement(text)
     elements.push(createElementObject(text))
+    applyZIndex()
+    renderLayers()
 
     setTimeout(() => text.focus(), 0)
     setActiveTool("select", toolSelectIcon)
+    
     return
   }
 
@@ -386,6 +453,8 @@ screen.addEventListener("mousedown", (e) => {
     screen.appendChild(r)
     selectElement(r)
     elements.push(createElementObject(r))
+    applyZIndex()
+    renderLayers()
     setActiveTool("select", toolSelectIcon)
     return
   }
@@ -488,7 +557,24 @@ function deleteSelectedElement() {
 
   stopAllActions()
   setActiveTool("select", toolSelectIcon)
+  renderLayers()
+
 }
+
+screen.addEventListener("blur", (e) => {
+  if (!e.target.classList.contains("text-box")) return
+
+  // auto delete empty text boxes
+  if (e.target.textContent.trim() === "") {
+    const idx = elements.findIndex(el => el.id === e.target.dataset.id)
+    if (idx !== -1) elements.splice(idx, 1)
+
+    e.target.remove()
+    localStorage.setItem("canvasElements", JSON.stringify(elements))
+    renderLayers()
+  }
+}, true)
+
 
 document.addEventListener("keydown", (e) => {
   if (!selectedElement) return
