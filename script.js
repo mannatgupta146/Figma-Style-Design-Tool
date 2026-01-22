@@ -49,6 +49,74 @@ const MIN_HEIGHT = 80
 
 let elementCounter = 0
 
+let elements = [] 
+
+screen.addEventListener("input", (e) => {
+  if (!e.target.classList.contains("text-box")) return
+  syncElementToStore(e.target)
+})
+
+/* =====================================================
+   LOAD FROM LOCAL STORAGE (ON REFRESH)
+===================================================== */
+
+function loadFromLocalStorage() {
+  const saved = localStorage.getItem("canvasElements")
+  if (!saved) return
+
+  screen.querySelectorAll(".rectangle, .text-box").forEach(el => el.remove())
+
+  try {
+    const data = JSON.parse(saved)
+    if (!Array.isArray(data)) return
+
+    elements = [] // reset safely
+
+    data.forEach(item => {
+      let el
+
+      if (item.type === "rectangle") {
+        el = document.createElement("div")
+        el.className = "rectangle"
+        el.style.width = item.width + "px"
+        el.style.height = item.height + "px"
+      }
+
+      if (item.type === "text") {
+        el = document.createElement("div")
+        el.className = "text-box"
+        el.contentEditable = "true"
+        el.textContent = item.text || ""
+      }
+
+      if (!el) return
+
+      // common props
+      el.dataset.id = item.id
+      el.dataset.type = item.type
+      el.style.left = item.x + "px"
+      el.style.top = item.y + "px"
+
+      if (item.rotation) {
+        el.style.transform = `rotate(${item.rotation}deg)`
+        el.dataset.rotation = item.rotation
+      }
+
+      screen.appendChild(el)
+      elements.push(item)
+    })
+
+    elementCounter = elements.reduce((max, e) => {
+  const n = parseInt(e.id.split("-")[1], 10)
+  return Math.max(max, isNaN(n) ? 0 : n)
+}, 0)
+
+  } catch (err) {
+    console.error("Failed to load canvas:", err)
+  }
+}
+
+
 /* =====================================================
    ZOOM
 ===================================================== */
@@ -373,8 +441,6 @@ for (let r = 0; r < rows; r++) {
    ELEMENT STORE
 ===================================================== */
 
-let elements = []   // 👈 SINGLE SOURCE OF TRUTH
-
 function createElementObject(el) {
   return {
     id: el.dataset.id,
@@ -401,6 +467,7 @@ function syncElementToStore(el) {
   if (el.dataset.type === "text") {
     elements[idx].text = el.textContent
   }
+  localStorage.setItem("canvasElements", JSON.stringify(elements))
 }
 
 function deleteSelectedElement() {
@@ -426,27 +493,31 @@ function deleteSelectedElement() {
 document.addEventListener("keydown", (e) => {
   if (!selectedElement) return
 
+  // block delete while typing text
   if (
     document.activeElement &&
-    document.activeElement.classList.contains("text-box")
+    document.activeElement.classList.contains("text-box") &&
+    (e.key === "Delete" || e.key === "Backspace")
   ) return
 
+  /* DELETE */
   if (e.key === "Delete" || e.key === "Backspace") {
     deleteSelectedElement()
+    return
   }
-})
 
-document.addEventListener("keydown", (e) => {
-  if (!selectedElement) return
-
+  /* MOVE WITH ARROWS */
   const step = 5
   let left = selectedElement.offsetLeft
   let top = selectedElement.offsetTop
 
   if (e.key === "ArrowUp") top -= step
-  if (e.key === "ArrowDown") top += step
-  if (e.key === "ArrowLeft") left -= step
-  if (e.key === "ArrowRight") left += step
+  else if (e.key === "ArrowDown") top += step
+  else if (e.key === "ArrowLeft") left -= step
+  else if (e.key === "ArrowRight") left += step
+  else return
+
+  e.preventDefault()
 
   left = Math.max(0, Math.min(left, screen.clientWidth - selectedElement.offsetWidth))
   top = Math.max(0, Math.min(top, screen.clientHeight - selectedElement.offsetHeight))
@@ -457,9 +528,15 @@ document.addEventListener("keydown", (e) => {
   syncElementToStore(selectedElement)
 })
 
+
 const saveBtn = document.querySelector(".buttons-right .save")
 
-saveBtn.onclick = () => {
-  localStorage.setItem("canvasElements", JSON.stringify(elements))
-  alert("Canvas saved successfully ✅")
+if (saveBtn) {
+  saveBtn.addEventListener("click", () => {
+    localStorage.setItem("canvasElements", JSON.stringify(elements))
+    console.log("Saved:", elements)
+    alert("Canvas saved successfully ✅")
+  })
 }
+
+loadFromLocalStorage()
