@@ -506,6 +506,12 @@ document.addEventListener("keydown", (e) => {
     return
   }
 
+  if (e.key === "Escape" && selectedElement.classList.contains("text-box")) {
+    selectedElement.blur()
+    screen.focus()
+    return
+  }
+
   /* MOVE WITH ARROWS */
   const step = 5
   let left = selectedElement.offsetLeft
