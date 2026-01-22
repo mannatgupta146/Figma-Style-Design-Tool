@@ -159,7 +159,94 @@ main {
 
         }
 
-        
+        .properties-panel{
+            position: fixed;
+            top: 80px;          
+            right: 20px;
+            width: 260px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 1000;  
+            
+            h3{
+                margin-bottom: 10px;
+                font-size: 16px;
+                font-weight: 600;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 6px;
+            }
+
+            .prop-group{
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                margin-bottom: 12px;
+
+                label{
+                    font-size: 12px;
+                    font-weight: 500;
+                    color: #555;
+                }
+
+                input, textarea{
+                    width: 100%;
+                    padding: 6px 8px;
+                    font-size: 14px;
+                    outline: none;
+                    border-radius: 6px;
+                    border: 1px solid #ccc;
+                }
+
+                textarea{
+                    resize: vertical;
+                    min-height: 40px;
+                }
+
+                input:focus, textarea:focus{
+                    border-color: #6b2fd6;
+                    box-shadow: 0 0 6px rgba(107, 47, 214, 0.3);
+                }
+
+                .text-style-controls{
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    margin-top: 5px;
+
+                    button{
+                        width: 36px;
+                        height: 30px;
+                        border-radius: 6px;
+                        border: 1px solid  #ccc;
+                        background: #f7f7f7f7;
+                        cursor: pointer;
+                        font-weight: 600;
+
+                        &:hover{
+                            background: #e9e2fb;
+                            border-color: #6b2fd6;
+                        }
+                    }
+                }
+                .text-style-controls input[type='color']{
+                    width: 36px;
+                    height: 36px;
+                    padding: 0;
+                    border-radius: 6px;
+                    border: 1px solid #ccc;
+                }
+
+            }
+            
+            
+        }
+       
+        .properties-panel.active{
+            display: block;
+        }
     }
 
     footer{
@@ -284,7 +371,7 @@ main {
             min-height: 24px;
             padding: 4px 6px;
             font-size: 16px;
-            background: transparent;
+            background-color: transparent;
             outline: none;
             cursor: text;
         }

@@ -15,6 +15,18 @@ const toolDeleteIcon = document.querySelector(".tool-delete")
 const layersList = document.querySelector(".layers-list")
 const layerUpBtn = document.querySelector(".layer-up")
 const layerDownBtn = document.querySelector(".layer-down")
+const propWidth = document.querySelector(".prop-width")
+const propHeight = document.querySelector(".prop-height")
+const propBg = document.querySelector(".prop-bg")
+const propText = document.querySelector(".prop-text")
+const propTextWrap = document.querySelector(".prop-text-wrap")
+const propertiesPanel = document.querySelector(".properties-panel")
+const toolEditIcon = document.querySelector(".tool-edit")
+const txtBold = document.querySelector(".txt-bold")
+const txtItalic = document.querySelector(".txt-italic")
+const txtUnderline = document.querySelector(".txt-underline")
+const propTextColor = document.querySelector(".prop-text-color")
+
 
 /* =====================================================
    GLOBAL STATE
@@ -90,6 +102,13 @@ function loadFromLocalStorage() {
         el.contentEditable = "true"
         el.textContent = item.text || ""
       }
+
+      if (item.bg) el.style.backgroundColor = item.bg
+      if (item.color) el.style.color = item.color
+      if (item.fontWeight) el.style.fontWeight = item.fontWeight
+      if (item.fontStyle) el.style.fontStyle = item.fontStyle
+      if (item.textDecoration) el.style.textDecoration = item.textDecoration
+
 
       if (!el) return
 
@@ -178,7 +197,48 @@ layerDownBtn.onclick = () => {
   localStorage.setItem("canvasElements", JSON.stringify(elements))
 }
 
+txtBold.onclick = () => {
+  if (!selectedElement) return
+  selectedElement.style.fontWeight =
+    selectedElement.style.fontWeight === "bold" ? "normal" : "bold"
+  syncElementToStore(selectedElement)
+}
 
+txtItalic.onclick = () => {
+  if (!selectedElement) return
+  selectedElement.style.fontStyle =
+    selectedElement.style.fontStyle === "italic" ? "normal" : "italic"
+  syncElementToStore(selectedElement)
+}
+
+txtUnderline.onclick = () => {
+  if (!selectedElement) return
+  selectedElement.style.textDecoration =
+    selectedElement.style.textDecoration === "underline" ? "none" : "underline"
+  syncElementToStore(selectedElement)
+}
+
+propTextColor.oninput = () => {
+  if (!selectedElement) return
+  selectedElement.style.color = propTextColor.value
+  syncElementToStore(selectedElement)
+}
+
+
+
+function updatePropertiesVisibility() {
+  if (!selectedElement) {
+    propertiesPanel.classList.remove("active")
+    return
+  }
+
+  if (activeTool === "resize") {
+    propertiesPanel.classList.add("active")
+    updatePropertiesPanel()
+  } else {
+    propertiesPanel.classList.remove("active")
+  }
+}
 
 
 /* =====================================================
@@ -223,6 +283,7 @@ function setActiveTool(name, icon) {
   if (selectedElement) {
     selectedElement.classList.toggle("resize-mode", name === "resize")
   }
+  updatePropertiesVisibility()
 }
 
 /* ---- Toolbar ---- */
@@ -250,6 +311,17 @@ toolTextIcon.onclick = () => {
   setActiveTool("text", toolTextIcon)
 }
 
+toolEditIcon.onclick = () => {
+  if (!selectedElement) return
+
+  if (activeTool === "resize") {
+    setActiveTool("select", toolSelectIcon)
+  } else {
+    setActiveTool("resize", toolEditIcon)
+  }
+}
+
+
 /* =====================================================
    SELECTION
 ===================================================== */
@@ -270,6 +342,8 @@ function selectElement(el) {
   if (el.dataset.type === "rectangle" && !el.querySelector(".resize-handle")) {
     addResizeHandles(el)
   }
+  updatePropertiesPanel()
+  updatePropertiesVisibility()
 
   el.classList.toggle("resize-mode", activeTool === "resize")
 }
@@ -278,6 +352,8 @@ function clearSelection() {
   if (!selectedElement) return
   selectedElement.classList.remove("selected", "resize-mode")
   selectedElement = null
+  propertiesPanel.classList.remove("active")
+
 }
 
 /* =====================================================
@@ -427,6 +503,7 @@ screen.addEventListener("mousedown", (e) => {
     screen.appendChild(text)
     selectElement(text)
     elements.push(createElementObject(text))
+    localStorage.setItem("canvasElements", JSON.stringify(elements))
     applyZIndex()
     renderLayers()
 
@@ -453,6 +530,7 @@ screen.addEventListener("mousedown", (e) => {
     screen.appendChild(r)
     selectElement(r)
     elements.push(createElementObject(r))
+    localStorage.setItem("canvasElements", JSON.stringify(elements))
     applyZIndex()
     renderLayers()
     setActiveTool("select", toolSelectIcon)
@@ -519,9 +597,15 @@ function createElementObject(el) {
     width: el.offsetWidth || null,
     height: el.offsetHeight || null,
     rotation: parseFloat(el.dataset.rotation || 0),
+    bg: getComputedStyle(el).backgroundColor,
+    color: getComputedStyle(el).color,
+    fontWeight: el.style.fontWeight || "normal",
+    fontStyle: el.style.fontStyle || "normal",
+    textDecoration: el.style.textDecoration || "none",
     text: el.dataset.type === "text" ? el.textContent : null
   }
 }
+
 
 function syncElementToStore(el) {
   const idx = elements.findIndex(e => e.id === el.dataset.id)
@@ -532,6 +616,12 @@ function syncElementToStore(el) {
   elements[idx].width = el.offsetWidth || null
   elements[idx].height = el.offsetHeight || null
   elements[idx].rotation = parseFloat(el.dataset.rotation || 0)
+  elements[idx].bg = getComputedStyle(el).backgroundColor
+  elements[idx].color = getComputedStyle(el).color
+  elements[idx].fontWeight = el.style.fontWeight || "normal"
+  elements[idx].fontStyle = el.style.fontStyle || "normal"
+  elements[idx].textDecoration = el.style.textDecoration || "none"
+
 
   if (el.dataset.type === "text") {
     elements[idx].text = el.textContent
@@ -583,11 +673,11 @@ document.addEventListener("keydown", (e) => {
   if (
     document.activeElement &&
     document.activeElement.classList.contains("text-box") &&
-    (e.key === "Delete" || e.key === "Backspace")
+    (e.key === "Delete")
   ) return
 
   /* DELETE */
-  if (e.key === "Delete" || e.key === "Backspace") {
+  if (e.key === "Delete") {
     deleteSelectedElement()
     return
   }
@@ -623,12 +713,133 @@ document.addEventListener("keydown", (e) => {
 
 const saveBtn = document.querySelector(".buttons-right .save")
 
-if (saveBtn) {
-  saveBtn.addEventListener("click", () => {
-    localStorage.setItem("canvasElements", JSON.stringify(elements))
-    console.log("Saved:", elements)
-    alert("Canvas saved successfully ✅")
-  })
+function updatePropertiesPanel() {
+  if (!selectedElement) return
+
+  propWidth.value = selectedElement.offsetWidth || ""
+  propHeight.value = selectedElement.offsetHeight || ""
+
+  // ✅ background for rectangle AND text
+  propBg.disabled = false
+  propBg.value = rgbToHex(
+    getComputedStyle(selectedElement).backgroundColor
+  )
+
+  // text-only controls
+  if (selectedElement.dataset.type === "text") {
+    propTextWrap.style.display = "block"
+    propText.value = selectedElement.textContent
+    propTextColor.value =
+      rgbToHex(getComputedStyle(selectedElement).color)
+  } else {
+    propTextWrap.style.display = "none"
+  }
 }
 
+propWidth.addEventListener("input", () => {
+  if (!selectedElement) return
+  selectedElement.style.width = propWidth.value + "px"
+  syncElementToStore(selectedElement)
+})
+
+
+propHeight.addEventListener("input", () => {
+  if (!selectedElement) return
+  selectedElement.style.height = propHeight.value + "px"
+  syncElementToStore(selectedElement)
+})
+
+propBg.addEventListener("input", () => {
+  if (!selectedElement) return
+  selectedElement.style.backgroundColor = propBg.value
+  syncElementToStore(selectedElement)
+})
+
+propText.addEventListener("input", () => {
+  if (!selectedElement) return
+  selectedElement.textContent = propText.value
+  syncElementToStore(selectedElement)
+})
+
+function rgbToHex(rgb) {
+  const res = rgb.match(/\d+/g)
+  if (!res) return "#000000"
+  return (
+    "#" +
+    res
+      .map(x => parseInt(x).toString(16).padStart(2, "0"))
+      .join("")
+  )
+}
+
+
 loadFromLocalStorage()
+
+
+document.querySelector(".export-json").onclick = () => {
+  const blob = new Blob(
+    [JSON.stringify(elements, null, 2)],
+    { type: "application/json" }
+  )
+
+  const a = document.createElement("a")
+  a.href = URL.createObjectURL(blob)
+  a.download = "design.json"
+  a.click()
+}
+
+document.querySelector(".export-html").onclick = () => {
+  let html = `
+<div style="
+  position:relative;
+  width:4000px;
+  height:4000px;
+  bacground: azure;
+">
+`
+
+  elements.forEach(el => {
+
+    /* ===== RECTANGLE ===== */
+    if (el.type === "rectangle") {
+      html += `
+<div style="
+  position:absolute;
+  left:${el.x}px;
+  top:${el.y}px;
+  width:${el.width}px;
+  height:${el.height}px;
+  background:${el.bg || "aquamarine"};
+  transform:rotate(${el.rotation}deg);
+"></div>
+`
+    }
+
+    /* ===== TEXT ===== */
+    if (el.type === "text") {
+      html += `
+<div style="
+  position:absolute;
+  left:${el.x}px;
+  top:${el.y}px;
+  background:${el.bg || "transparent"};
+  color:${el.color || "#000"};
+  font-weight:${el.fontWeight || "normal"};
+  font-style:${el.fontStyle || "normal"};
+  text-decoration:${el.textDecoration || "none"};
+  transform:rotate(${el.rotation}deg);
+">
+${el.text || ""}
+</div>
+`
+    }
+  })
+
+  html += "</div>"
+
+  const blob = new Blob([html], { type: "text/html" })
+  const a = document.createElement("a")
+  a.href = URL.createObjectURL(blob)
+  a.download = "design.html"
+  a.click()
+}

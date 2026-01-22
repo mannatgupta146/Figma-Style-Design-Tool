@@ -136,6 +136,81 @@ main nav .layers-panel .layers-controls button:hover {
   background-color: #d2d0d0;
   color: #6311f2;
 }
+main nav .properties-panel {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 260px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  display: none;
+  z-index: 1000;
+}
+main nav .properties-panel h3 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 6px;
+}
+main nav .properties-panel .prop-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+main nav .properties-panel .prop-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+}
+main nav .properties-panel .prop-group input, main nav .properties-panel .prop-group textarea {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 14px;
+  outline: none;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+main nav .properties-panel .prop-group textarea {
+  resize: vertical;
+  min-height: 40px;
+}
+main nav .properties-panel .prop-group input:focus, main nav .properties-panel .prop-group textarea:focus {
+  border-color: #6b2fd6;
+  box-shadow: 0 0 6px rgba(107, 47, 214, 0.3);
+}
+main nav .properties-panel .prop-group .text-style-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+}
+main nav .properties-panel .prop-group .text-style-controls button {
+  width: 36px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: rgba(247, 247, 247, 0.968627451);
+  cursor: pointer;
+  font-weight: 600;
+}
+main nav .properties-panel .prop-group .text-style-controls button:hover {
+  background: #e9e2fb;
+  border-color: #6b2fd6;
+}
+main nav .properties-panel .prop-group .text-style-controls input[type=color] {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+main nav .properties-panel.active {
+  display: block;
+}
 main footer {
   padding: 10px;
   display: flex;
@@ -241,7 +316,7 @@ main .screen .text-box {
   min-height: 24px;
   padding: 4px 6px;
   font-size: 16px;
-  background: transparent;
+  background-color: transparent;
   outline: none;
   cursor: text;
 }

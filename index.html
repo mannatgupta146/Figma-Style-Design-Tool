@@ -9,6 +9,7 @@
 </head>
 <body>
     <main>
+        
         <nav>
             <div class="buttons-left">
                 <button onclick="zoomIn()">+</button>
@@ -26,9 +27,44 @@
             </div>
 
             <div class="buttons-right">
-                <button class="save">Save</button>
-                <button class="share">Share</button>
+                <button class="share export-json">Export JSON</button>
+                <button class="share export-html">Export HTML</button>
+
             </div>
+
+            <div class="properties-panel">
+                <h3>Properties</h3>
+
+                <div class="prop-group">
+                    <label>Width</label>
+                    <input type="number" class="prop-width" />
+                </div>
+
+                <div class="prop-group">
+                    <label>Height</label>
+                    <input type="number" class="prop-height" />
+                </div>
+
+
+                <div class="prop-group">
+                    <label>Background</label>
+                    <input type="color" class="prop-bg" />
+                </div>
+
+                <div class="prop-group prop-text-wrap">
+                    <label>Text</label>
+                    <textarea class="prop-text"></textarea>
+
+                    <div class="text-style-controls">
+                        <button class="txt-bold">B</button>
+                        <button class="txt-italic">I</button>
+                        <button class="txt-underline">U</button>
+                        <input type="color" class="prop-text-color" />
+                    </div>
+                </div>
+            </div>
+
+
         </nav>
 
         <footer>
@@ -38,6 +74,7 @@
                 <i class="ri-add-box-line tool tool-rectangle"></i>
                 <i class="ri-expand-diagonal-line tool tool-resize"></i>
                 <i class="ri-text-block tool tool-text"></i>
+                <i class="ri-edit-2-line tool tool-edit"></i>
                 
             </div>
             
