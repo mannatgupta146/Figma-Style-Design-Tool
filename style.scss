@@ -109,25 +109,17 @@ main {
 
         .layers-panel{
             position: fixed;
-  
             right: 20px;
-  
-            top: 80px;
-  
+            bottom: 10px;
             width: 200px;
-  
             background: #fff;
-  
             border-radius: 10px;
-  
             padding: 10px;
-  
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  
             z-index: 2000;
 
             h4{
-                margin-bottom: 18px;
+                margin-bottom: 10px;
                 font-size: 18px;
             }
 
@@ -152,9 +144,17 @@ main {
             }
 
             .layers-controls button{
-                width: 100%;
                 margin-bottom: 5px;
                 cursor: pointer;
+
+                &:active{
+                    scale: 0.92;
+                }
+
+                &:hover{
+                    background-color: #d2d0d0;
+                    color: #6311f2;
+                }
             }
 
         }

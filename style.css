@@ -96,7 +96,7 @@ main nav .buttons-right .save {
 main nav .layers-panel {
   position: fixed;
   right: 20px;
-  top: 80px;
+  bottom: 10px;
   width: 200px;
   background: #fff;
   border-radius: 10px;
@@ -105,7 +105,7 @@ main nav .layers-panel {
   z-index: 2000;
 }
 main nav .layers-panel h4 {
-  margin-bottom: 18px;
+  margin-bottom: 10px;
   font-size: 18px;
 }
 main nav .layers-panel .layers-list {
@@ -126,9 +126,15 @@ main nav .layers-panel .layers-list li.active {
   color: #6b2fd6;
 }
 main nav .layers-panel .layers-controls button {
-  width: 100%;
   margin-bottom: 5px;
   cursor: pointer;
+}
+main nav .layers-panel .layers-controls button:active {
+  scale: 0.92;
+}
+main nav .layers-panel .layers-controls button:hover {
+  background-color: #d2d0d0;
+  color: #6311f2;
 }
 main footer {
   padding: 10px;
