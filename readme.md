@@ -2,6 +2,9 @@
 
 A browser-based **Figma-inspired design editor** built using **pure HTML, CSS, and Vanilla JavaScript**, focusing on core editor concepts like selection, layers, properties, and persistence.
 
+# Detailed video description 
+Watch the full walkthrough here: [Figma Style Design Tool - Google Drive](https://drive.google.com/drive/folders/1fZrpfj_OYMvN9MZhwODL1mMjW5UoAvSm?usp=sharing)
+
 ## 🚀 What You Can Do
 - Create **rectangles** and **text elements**
 - Select, drag, resize (4-corner), and rotate elements
