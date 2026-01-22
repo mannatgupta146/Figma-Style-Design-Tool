@@ -14,7 +14,7 @@ A browser-based **Figma-inspired design editor** built using **pure HTML, CSS, a
 - Export designs as **JSON** or **HTML**
 
 ## 🖼 Preview
-<img src="assets/problem.png" alt="Editor Preview" height="230"/>
+<img src="assets/problem.png" alt="Editor Preview" height="300"/>
 
 ## 🧩 Editor Architecture (Conceptual)
 - DOM-based element rendering (no `<canvas>`)
